@@ -1,5 +1,4 @@
 import { useListGames } from "@workspace/api-client-react";
-import { useState } from "react";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +28,6 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
             >
               <CardContent className="p-0">
                 <div className="flex items-stretch">
-                  {/* Date/Time sidebar */}
                   <div className={`w-40 shrink-0 p-4 flex flex-col justify-center border-r border-border/50 ${isCompleted ? "bg-background/40" : "bg-background/20"}`}>
                     <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-0.5">
                       Game {game.gameNum}
@@ -42,7 +40,6 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
                     </div>
                   </div>
 
-                  {/* Matchup / Score */}
                   <div className="flex-1 flex items-center px-6 py-4">
                     {hasMatchup ? (
                       <div className="flex items-center gap-4 w-full">
@@ -69,7 +66,6 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
                     )}
                   </div>
 
-                  {/* MVP */}
                   {game.mvp && game.mvp !== "-" && (
                     <div className="hidden md:flex items-center px-6 border-l border-border/50">
                       <div className="flex flex-col">
@@ -79,7 +75,6 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
                     </div>
                   )}
 
-                  {/* Notes (non-TBD) */}
                   {game.notes && game.notes !== "-" && game.notes !== "Matchup TBD" && (
                     <div className="hidden md:flex items-center px-6 border-l border-border/50">
                       <span className="text-xs text-muted-foreground italic">{game.notes}</span>
@@ -95,39 +90,130 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
   );
 }
 
+function LiveGameCard({ game, idx }: { game: any; idx: number }) {
+  return (
+    <motion.div
+      key={game.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.04 }}
+    >
+      <Card className={`overflow-hidden border-border/50 transition-colors ${
+        game.status === "live"
+          ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(255,45,85,0.15)]"
+          : game.status === "final" || game.status === "completed"
+          ? "bg-card/40"
+          : "bg-card/30 hover:bg-card/50"
+      }`}>
+        <CardContent className="p-0">
+          <div className="flex items-stretch">
+            <div className={`w-40 shrink-0 p-4 flex flex-col justify-center border-r border-border/50 ${
+              game.status === "live" ? "bg-primary/20" : "bg-background/30"
+            }`}>
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                {format(new Date(game.scheduledAt), "MMM d, yyyy")}
+              </div>
+              {game.status === "live" ? (
+                <div className="text-red-500 font-display text-lg animate-pulse tracking-widest uppercase">Live</div>
+              ) : game.status === "final" || game.status === "completed" ? (
+                <div className="text-white font-display text-lg tracking-wider">Final</div>
+              ) : (
+                <div className="text-white font-display text-lg tracking-wider">
+                  {format(new Date(game.scheduledAt), "h:mm a")}
+                </div>
+              )}
+              {game.isFeatured && (
+                <div className="mt-2 text-xs font-bold text-accent uppercase tracking-widest border border-accent/30 rounded px-2 py-1 self-start">
+                  Featured
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 flex items-center px-4 md:px-8 py-4">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3 md:gap-5 w-[40%] justify-end">
+                  <span className="font-display text-lg md:text-3xl tracking-wider text-right leading-tight">{game.awayTeamName}</span>
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.awayTeamColor }}>
+                    <span className="text-sm md:text-lg font-bold" style={{ color: game.awayTeamColor }}>{game.awayTeamAbbreviation}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center w-[20%]">
+                  {(game.status === "final" || game.status === "completed" || game.status === "live") ? (
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <span className={`font-display text-2xl md:text-4xl ${game.awayScore > game.homeScore ? "text-white" : "text-white/40"}`}>
+                        {game.awayScore}
+                      </span>
+                      <span className="text-muted-foreground font-bold text-sm">–</span>
+                      <span className={`font-display text-2xl md:text-4xl ${game.homeScore > game.awayScore ? "text-white" : "text-white/40"}`}>
+                        {game.homeScore}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">VS</span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 md:gap-5 w-[40%] justify-start">
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.homeTeamColor }}>
+                    <span className="text-sm md:text-lg font-bold" style={{ color: game.homeTeamColor }}>{game.homeTeamAbbreviation}</span>
+                  </div>
+                  <span className="font-display text-lg md:text-3xl tracking-wider text-left leading-tight">{game.homeTeamName}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 export default function Schedule() {
-  const [liveStatus, setLiveStatus] = useState<"upcoming" | "completed">("upcoming");
+  const { data: liveGames, isLoading: isLiveLoading } = useListGames({ status: "live" });
   const { data: upcomingGames, isLoading: isUpcomingLoading } = useListGames({ status: "upcoming" });
   const { data: completedGames, isLoading: isCompletedLoading } = useListGames({ status: "completed" });
-  const { data: liveGames, isLoading: isLiveLoading } = useListGames({ status: "live" });
 
-  const activeGames = liveStatus === "upcoming" ? [...(liveGames || []), ...(upcomingGames || [])] : completedGames;
-  const isLoading = liveStatus === "upcoming" ? (isUpcomingLoading || isLiveLoading) : isCompletedLoading;
+  const isLoading = isLiveLoading || isUpcomingLoading || isCompletedLoading;
+
+  const allGames = [
+    ...(liveGames || []),
+    ...(upcomingGames || []),
+    ...(completedGames || []).sort(
+      (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+    ),
+  ];
+
+  const hasLive = (liveGames?.length ?? 0) > 0;
 
   return (
     <div className="container max-w-screen-xl mx-auto px-4 py-12">
-      <div className="mb-12">
+      <div className="mb-10">
         <h1 className="text-5xl md:text-7xl font-display font-bold tracking-wider text-white uppercase drop-shadow-[0_0_10px_rgba(255,45,85,0.3)]">
           Schedule
         </h1>
-        <p className="text-muted-foreground text-lg mt-4">
+        <p className="text-muted-foreground text-lg mt-3">
           Preseason, regular season, playoffs, and live scores.
         </p>
       </div>
 
       <Tabs defaultValue="preseason" className="w-full">
-        <TabsList className="mb-8 bg-card/50 border border-border/50 flex-wrap h-auto gap-1 p-1">
+        <TabsList className="mb-8 bg-card/50 border border-border/50 h-auto gap-1 p-1">
           <TabsTrigger value="preseason" className="font-display tracking-wide text-base">Preseason</TabsTrigger>
           <TabsTrigger value="regular" className="font-display tracking-wide text-base">Regular Season</TabsTrigger>
           <TabsTrigger value="playoffs" className="font-display tracking-wide text-base">Playoffs</TabsTrigger>
-          <TabsTrigger value="live" className="font-display tracking-wide text-base">Live / Upcoming</TabsTrigger>
-          <TabsTrigger value="results" className="font-display tracking-wide text-base">Past Results</TabsTrigger>
+          <TabsTrigger value="scores" className="font-display tracking-wide text-base relative">
+            {hasLive && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            )}
+            Scores
+          </TabsTrigger>
         </TabsList>
 
-        {/* Preseason Tab */}
+        {/* Preseason */}
         <TabsContent value="preseason">
           <div className="mb-6">
-            <div className="inline-block bg-primary/10 border border-primary/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary mb-4">
+            <div className="inline-block bg-primary/10 border border-primary/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
               ARHL Pre-Season Schedule
             </div>
           </div>
@@ -136,10 +222,10 @@ export default function Schedule() {
           ))}
         </TabsContent>
 
-        {/* Regular Season Tab */}
+        {/* Regular Season */}
         <TabsContent value="regular">
           <div className="mb-6">
-            <div className="inline-block bg-accent/10 border border-accent/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent mb-4">
+            <div className="inline-block bg-accent/10 border border-accent/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent">
               ARHL Season 2 Schedule
             </div>
           </div>
@@ -148,10 +234,10 @@ export default function Schedule() {
           ))}
         </TabsContent>
 
-        {/* Playoffs Tab */}
+        {/* Playoffs */}
         <TabsContent value="playoffs">
           <div className="mb-6">
-            <div className="inline-block bg-yellow-500/10 border border-yellow-500/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-yellow-400 mb-4">
+            <div className="inline-block bg-yellow-500/10 border border-yellow-500/30 rounded px-3 py-1 text-xs font-bold uppercase tracking-widest text-yellow-400">
               ARHL Playoffs
             </div>
           </div>
@@ -160,145 +246,32 @@ export default function Schedule() {
           ))}
         </TabsContent>
 
-        {/* Live / Upcoming Tab */}
-        <TabsContent value="live">
-          <Tabs defaultValue="upcoming" onValueChange={(v) => setLiveStatus(v as any)} className="w-full">
-            <TabsList className="mb-6 bg-card/30 border border-border/40">
-              <TabsTrigger value="upcoming" className="font-display tracking-wide">Upcoming & Live</TabsTrigger>
-              <TabsTrigger value="completed" className="font-display tracking-wide">Past Results</TabsTrigger>
-            </TabsList>
-            <div className="space-y-4">
-              {isLoading ? (
-                [...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full rounded-xl" />
-                ))
-              ) : activeGames && activeGames.length > 0 ? (
-                activeGames.map((game, idx) => (
-                  <motion.div
-                    key={game.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                  >
-                    <Card className={`overflow-hidden border-border/50 transition-colors ${game.status === "live" ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(255,45,85,0.15)]" : "bg-card/40 hover:bg-card"}`}>
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row">
-                          <div className={`md:w-48 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-border/50 ${game.status === "live" ? "bg-primary/20" : "bg-background/50"}`}>
-                            <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                              {format(new Date(game.scheduledAt), "MMM d, yyyy")}
-                            </div>
-                            {game.status === "live" ? (
-                              <div className="text-red-500 font-display text-2xl animate-pulse tracking-widest uppercase">Live Now</div>
-                            ) : game.status === "completed" ? (
-                              <div className="text-white font-display text-xl tracking-wider">Final</div>
-                            ) : (
-                              <div className="text-white font-display text-2xl tracking-wider">{format(new Date(game.scheduledAt), "h:mm a")}</div>
-                            )}
-                            {game.isFeatured && (
-                              <div className="mt-2 text-xs font-bold text-accent uppercase tracking-widest border border-accent/30 rounded px-2 py-1 self-start inline-block">
-                                Featured
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 flex flex-col justify-center p-6 md:p-8 relative">
-                            <div className="flex items-center justify-between w-full relative z-10">
-                              <div className="flex items-center gap-6 w-[40%] justify-end">
-                                <span className="font-display text-2xl md:text-4xl tracking-wider text-right">{game.awayTeamName}</span>
-                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.awayTeamColor }}>
-                                  <span className="text-xl font-bold" style={{ color: game.awayTeamColor }}>{game.awayTeamAbbreviation}</span>
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-center justify-center w-[20%]">
-                                {(game.status === "completed" || game.status === "live") ? (
-                                  <div className="flex items-center gap-2 md:gap-4">
-                                    <span className={`font-display text-3xl md:text-5xl ${game.awayScore > game.homeScore ? "text-white" : "text-white/50"}`}>{game.awayScore}</span>
-                                    <span className="text-muted-foreground font-bold">-</span>
-                                    <span className={`font-display text-3xl md:text-5xl ${game.homeScore > game.awayScore ? "text-white" : "text-white/50"}`}>{game.homeScore}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">VS</span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-6 w-[40%] justify-start">
-                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.homeTeamColor }}>
-                                  <span className="text-xl font-bold" style={{ color: game.homeTeamColor }}>{game.homeTeamAbbreviation}</span>
-                                </div>
-                                <span className="font-display text-2xl md:text-4xl tracking-wider text-left">{game.homeTeamName}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="py-24 text-center border border-border/50 rounded-xl bg-card/20">
-                  <h3 className="font-display text-2xl text-muted-foreground">No games found</h3>
-                  <p className="text-muted-foreground mt-2">Check back later for updates to the schedule.</p>
+        {/* Scores — live, upcoming, and past results combined */}
+        <TabsContent value="scores">
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : allGames.length > 0 ? (
+            <div className="space-y-3">
+              {hasLive && (
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-red-400">Games in progress</span>
                 </div>
               )}
+              {allGames.map((game, idx) => (
+                <LiveGameCard key={game.id} game={game} idx={idx} />
+              ))}
             </div>
-          </Tabs>
-        </TabsContent>
-
-        {/* Past Results shortcut tab */}
-        <TabsContent value="results">
-          <div className="space-y-4">
-            {isCompletedLoading ? (
-              [...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full rounded-xl" />
-              ))
-            ) : completedGames && completedGames.length > 0 ? (
-              completedGames.map((game, idx) => (
-                <motion.div
-                  key={game.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                >
-                  <Card className="overflow-hidden border-border/50 bg-card/40 hover:bg-card transition-colors">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="md:w-48 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-border/50 bg-background/50">
-                          <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                            {format(new Date(game.scheduledAt), "MMM d, yyyy")}
-                          </div>
-                          <div className="text-white font-display text-xl tracking-wider">Final</div>
-                        </div>
-                        <div className="flex-1 flex flex-col justify-center p-6 md:p-8">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-6 w-[40%] justify-end">
-                              <span className="font-display text-2xl md:text-4xl tracking-wider text-right">{game.awayTeamName}</span>
-                              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.awayTeamColor }}>
-                                <span className="text-xl font-bold" style={{ color: game.awayTeamColor }}>{game.awayTeamAbbreviation}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 md:gap-4 w-[20%] justify-center">
-                              <span className={`font-display text-3xl md:text-5xl ${game.awayScore > game.homeScore ? "text-white" : "text-white/50"}`}>{game.awayScore}</span>
-                              <span className="text-muted-foreground font-bold">-</span>
-                              <span className={`font-display text-3xl md:text-5xl ${game.homeScore > game.awayScore ? "text-white" : "text-white/50"}`}>{game.homeScore}</span>
-                            </div>
-                            <div className="flex items-center gap-6 w-[40%] justify-start">
-                              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 bg-card flex items-center justify-center shrink-0" style={{ borderColor: game.homeTeamColor }}>
-                                <span className="text-xl font-bold" style={{ color: game.homeTeamColor }}>{game.homeTeamAbbreviation}</span>
-                              </div>
-                              <span className="font-display text-2xl md:text-4xl tracking-wider text-left">{game.homeTeamName}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))
-            ) : (
-              <div className="py-24 text-center border border-border/50 rounded-xl bg-card/20">
-                <h3 className="font-display text-2xl text-muted-foreground">No past results</h3>
-                <p className="text-muted-foreground mt-2">Check back after games have been played.</p>
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className="py-24 text-center border border-border/50 rounded-xl bg-card/20">
+              <h3 className="font-display text-2xl text-muted-foreground">No games found</h3>
+              <p className="text-muted-foreground mt-2">Check back later for updates.</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
