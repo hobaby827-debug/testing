@@ -11,11 +11,13 @@ export interface Team {
   name: string;
   abbreviation: string;
   city: string;
+  division: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;
   wins: number;
   losses: number;
+  otLosses: number;
   points: number;
   goalsFor: number;
   goalsAgainst: number;

@@ -7,10 +7,13 @@ const router = Router();
 
 function buildStandings(teams: typeof teamsTable.$inferSelect[]) {
   const sorted = [...teams].sort((a, b) => {
-    const pointsA = a.wins * 2;
-    const pointsB = b.wins * 2;
+    const pointsA = a.wins * 2 + a.otLosses;
+    const pointsB = b.wins * 2 + b.otLosses;
     if (pointsB !== pointsA) return pointsB - pointsA;
-    return (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
+    const gdA = a.goalsFor - a.goalsAgainst;
+    const gdB = b.goalsFor - b.goalsAgainst;
+    if (gdB !== gdA) return gdB - gdA;
+    return b.goalsFor - a.goalsFor;
   });
 
   return sorted.map((team, i) => ({
@@ -18,10 +21,12 @@ function buildStandings(teams: typeof teamsTable.$inferSelect[]) {
     teamId: team.id,
     teamName: team.name,
     teamAbbreviation: team.abbreviation,
+    division: team.division,
     primaryColor: team.primaryColor,
     wins: team.wins,
     losses: team.losses,
-    points: team.wins * 2,
+    otLosses: team.otLosses,
+    points: team.wins * 2 + team.otLosses,
     goalsFor: team.goalsFor,
     goalsAgainst: team.goalsAgainst,
     goalDifferential: team.goalsFor - team.goalsAgainst,

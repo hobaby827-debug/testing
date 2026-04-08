@@ -9,7 +9,7 @@ const router = Router();
 function computeTeamStats(team: typeof teamsTable.$inferSelect) {
   return {
     ...team,
-    points: team.wins * 2,
+    points: team.wins * 2 + team.otLosses,
     goalDifferential: team.goalsFor - team.goalsAgainst,
     logoUrl: team.logoUrl ?? null,
   };

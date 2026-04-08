@@ -10,6 +10,7 @@ export interface CreateTeamBody {
   name: string;
   abbreviation: string;
   city: string;
+  division: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;

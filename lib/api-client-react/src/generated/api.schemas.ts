@@ -14,11 +14,13 @@ export interface Team {
   name: string;
   abbreviation: string;
   city: string;
+  division: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;
   wins: number;
   losses: number;
+  otLosses: number;
   points: number;
   goalsFor: number;
   goalsAgainst: number;
@@ -87,6 +89,7 @@ export interface CreateTeamBody {
   name: string;
   abbreviation: string;
   city: string;
+  division: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;
@@ -124,9 +127,11 @@ export interface Standing {
   teamId: number;
   teamName: string;
   teamAbbreviation: string;
+  division: string;
   primaryColor: string;
   wins: number;
   losses: number;
+  otLosses: number;
   points: number;
   goalsFor: number;
   goalsAgainst: number;

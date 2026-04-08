@@ -7,11 +7,13 @@ export const teamsTable = pgTable("teams", {
   name: text("name").notNull(),
   abbreviation: varchar("abbreviation", { length: 5 }).notNull(),
   city: text("city").notNull(),
+  division: text("division").notNull().default(""),
   primaryColor: varchar("primary_color", { length: 20 }).notNull().default("#1a1a2e"),
   secondaryColor: varchar("secondary_color", { length: 20 }).notNull().default("#ffffff"),
   logoUrl: text("logo_url"),
   wins: integer("wins").notNull().default(0),
   losses: integer("losses").notNull().default(0),
+  otLosses: integer("ot_losses").notNull().default(0),
   goalsFor: integer("goals_for").notNull().default(0),
   goalsAgainst: integer("goals_against").notNull().default(0),
 });

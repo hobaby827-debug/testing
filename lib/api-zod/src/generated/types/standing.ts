@@ -11,9 +11,11 @@ export interface Standing {
   teamId: number;
   teamName: string;
   teamAbbreviation: string;
+  division: string;
   primaryColor: string;
   wins: number;
   losses: number;
+  otLosses: number;
   points: number;
   goalsFor: number;
   goalsAgainst: number;
