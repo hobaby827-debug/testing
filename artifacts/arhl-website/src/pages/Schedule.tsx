@@ -15,12 +15,13 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
       transition={{ delay: index * 0.05 }}
       className="mb-8"
     >
-      <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 pl-1 border-l-2 border-primary pl-3">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 border-l-2 border-primary pl-3">
         {section.label}
       </h2>
       <div className="space-y-2">
         {section.games.map((game, gi) => {
           const isCompleted = !!game.finalScore && game.finalScore !== "-";
+          const hasMatchup = game.away && game.home;
           return (
             <Card
               key={gi}
@@ -28,9 +29,10 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
             >
               <CardContent className="p-0">
                 <div className="flex items-stretch">
+                  {/* Date/Time sidebar */}
                   <div className={`w-40 shrink-0 p-4 flex flex-col justify-center border-r border-border/50 ${isCompleted ? "bg-background/40" : "bg-background/20"}`}>
                     <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-0.5">
-                      Game {gi + 1}
+                      Game {game.gameNum}
                     </div>
                     <div className="text-sm font-semibold text-white/80">
                       {game.date !== "TBD" ? game.date : <span className="text-muted-foreground">TBD</span>}
@@ -39,27 +41,48 @@ function StaticScheduleSection({ section, index }: { section: ScheduleSection; i
                       {game.time !== "TBD" ? game.time : ""}
                     </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-center px-6 py-4">
-                    {isCompleted ? (
-                      <div className="flex flex-col items-center gap-1">
+
+                  {/* Matchup / Score */}
+                  <div className="flex-1 flex items-center px-6 py-4">
+                    {hasMatchup ? (
+                      <div className="flex items-center gap-4 w-full">
+                        <span className="font-display text-xl md:text-2xl tracking-wider text-white/90 text-right flex-1">{game.away}</span>
+                        {isCompleted ? (
+                          <div className="flex flex-col items-center shrink-0">
+                            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Final</span>
+                            <span className="font-display text-xl md:text-2xl tracking-wider text-white">{game.finalScore}</span>
+                          </div>
+                        ) : (
+                          <span className="text-lg font-bold text-muted-foreground shrink-0 px-2">@</span>
+                        )}
+                        <span className="font-display text-xl md:text-2xl tracking-wider text-white/90 flex-1">{game.home}</span>
+                      </div>
+                    ) : isCompleted ? (
+                      <div className="flex flex-col items-center gap-1 w-full">
                         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Final</span>
                         <span className="font-display text-2xl md:text-3xl tracking-wider text-white">{game.finalScore}</span>
                       </div>
                     ) : (
-                      <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Scheduled</span>
+                      <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                        {game.notes === "Matchup TBD" ? "Matchup TBD" : "Scheduled"}
+                      </span>
                     )}
                   </div>
-                  {game.notes && game.notes !== "-" && (
-                    <div className="hidden md:flex items-center px-6 border-l border-border/50">
-                      <span className="text-xs text-muted-foreground italic">{game.notes}</span>
-                    </div>
-                  )}
+
+                  {/* MVP */}
                   {game.mvp && game.mvp !== "-" && (
                     <div className="hidden md:flex items-center px-6 border-l border-border/50">
                       <div className="flex flex-col">
                         <span className="text-xs font-bold uppercase tracking-widest text-accent/80">MVP</span>
                         <span className="text-sm font-semibold text-white">{game.mvp}</span>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Notes (non-TBD) */}
+                  {game.notes && game.notes !== "-" && game.notes !== "Matchup TBD" && (
+                    <div className="hidden md:flex items-center px-6 border-l border-border/50">
+                      <span className="text-xs text-muted-foreground italic">{game.notes}</span>
                     </div>
                   )}
                 </div>

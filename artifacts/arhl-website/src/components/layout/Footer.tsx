@@ -13,7 +13,7 @@ export function Footer() {
               The American Roblox Hockey League. The premier competitive hockey experience on Roblox. Intense, fast-paced, and electric.
             </p>
             <a 
-              href="https://discord.gg/arhl" 
+              href="https://discord.gg/4aknWMz6rz" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-[#5865F2] text-white hover:bg-[#5865F2]/90 h-9 px-4 py-2"

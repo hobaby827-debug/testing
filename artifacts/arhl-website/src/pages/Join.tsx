@@ -55,7 +55,7 @@ export default function Join() {
           </div>
 
           <Button asChild size="lg" className="h-14 px-8 text-lg font-display tracking-wider bg-[#5865F2] hover:bg-[#5865F2]/90 text-white w-full sm:w-auto">
-            <a href="https://discord.gg/arhl" target="_blank" rel="noopener noreferrer">
+            <a href="https://discord.gg/4aknWMz6rz" target="_blank" rel="noopener noreferrer">
               Join Discord Server
             </a>
           </Button>
