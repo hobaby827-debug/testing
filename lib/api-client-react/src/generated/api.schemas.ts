@@ -272,3 +272,7 @@ export const ListGamesStatus = {
   live: "live",
   completed: "completed",
 } as const;
+
+export type DeleteGame200 = {
+  success?: boolean;
+};

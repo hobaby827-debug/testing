@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { 
-  useGetAdminMe, 
-  useListGames, 
-  useUpdateGame, 
-  useListAnnouncements, 
+import {
+  useGetAdminMe,
+  useListGames,
+  useUpdateGame,
+  useCreateGame,
+  useDeleteGame,
+  useListAnnouncements,
   useCreateAnnouncement,
   useDeleteAnnouncement,
   useListTeams,
@@ -16,7 +18,7 @@ import {
   getListGamesQueryKey,
   getListAnnouncementsQueryKey,
   getListTeamsQueryKey,
-  getListPlayersQueryKey
+  getListPlayersQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -28,7 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, RefreshCw } from "lucide-react";
+import { Loader2, Plus, Trash2, RefreshCw, CalendarPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminDashboard() {
@@ -49,8 +51,10 @@ export default function AdminDashboard() {
   const { data: announcements } = useListAnnouncements();
   const { data: teams } = useListTeams();
   const { data: players } = useListPlayers();
-  
+
   const updateGame = useUpdateGame();
+  const createGame = useCreateGame();
+  const deleteGame = useDeleteGame();
   const createAnn = useCreateAnnouncement();
   const deleteAnn = useDeleteAnnouncement();
   const createTeam = useCreateTeam();
@@ -63,7 +67,6 @@ export default function AdminDashboard() {
       setShowGoalAnim(true);
       setTimeout(() => setShowGoalAnim(false), 2000);
     }
-    
     updateGame.mutate(
       { id: gameId, data: { awayScore, homeScore } },
       {
@@ -87,6 +90,58 @@ export default function AdminDashboard() {
     );
   };
 
+  const handleDeleteGame = (gameId: number) => {
+    if (!confirm("Delete this game? This cannot be undone.")) return;
+    deleteGame.mutate(
+      { id: gameId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListGamesQueryKey() });
+          toast({ title: "Game deleted" });
+        },
+        onError: () => toast({ variant: "destructive", title: "Failed to delete game" })
+      }
+    );
+  };
+
+  // New game form state
+  const [showAddGame, setShowAddGame] = useState(false);
+  const [newHomeTeamId, setNewHomeTeamId] = useState("");
+  const [newAwayTeamId, setNewAwayTeamId] = useState("");
+  const [newScheduledAt, setNewScheduledAt] = useState("");
+  const [newIsFeatured, setNewIsFeatured] = useState(false);
+
+  const handleCreateGame = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHomeTeamId || !newAwayTeamId || !newScheduledAt) return;
+    if (newHomeTeamId === newAwayTeamId) {
+      toast({ variant: "destructive", title: "Home and away teams must be different" });
+      return;
+    }
+    createGame.mutate(
+      {
+        data: {
+          homeTeamId: parseInt(newHomeTeamId),
+          awayTeamId: parseInt(newAwayTeamId),
+          scheduledAt: new Date(newScheduledAt).toISOString(),
+          isFeatured: newIsFeatured,
+        }
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListGamesQueryKey() });
+          toast({ title: "Game added" });
+          setNewHomeTeamId("");
+          setNewAwayTeamId("");
+          setNewScheduledAt("");
+          setNewIsFeatured(false);
+          setShowAddGame(false);
+        },
+        onError: () => toast({ variant: "destructive", title: "Failed to create game" })
+      }
+    );
+  };
+
   // Ann form state
   const [annTitle, setAnnTitle] = useState("");
   const [annCat, setAnnCat] = useState("LEAGUE");
@@ -100,8 +155,7 @@ export default function AdminDashboard() {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListAnnouncementsQueryKey() });
           toast({ title: "Announcement posted" });
-          setAnnTitle("");
-          setAnnContent("");
+          setAnnTitle(""); setAnnContent("");
         }
       }
     );
@@ -194,7 +248,7 @@ export default function AdminDashboard() {
     <div className="container max-w-screen-xl mx-auto px-4 py-12 relative">
       <AnimatePresence>
         {showGoalAnim && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.5, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.5, filter: "blur(10px)" }}
@@ -207,26 +261,74 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="mb-12 flex justify-between items-end">
+      <div className="mb-10 flex justify-between items-end">
         <div>
-          <h1 className="text-4xl md:text-6xl font-display font-bold tracking-wider text-white uppercase">
-            League Office
-          </h1>
-          <p className="text-muted-foreground text-lg uppercase tracking-widest font-bold mt-2">
-            Control Panel
-          </p>
+          <h1 className="text-4xl md:text-6xl font-display font-bold tracking-wider text-white uppercase">League Office</h1>
+          <p className="text-muted-foreground text-lg uppercase tracking-widest font-bold mt-2">Control Panel</p>
         </div>
       </div>
 
       <Tabs defaultValue="scores" className="w-full">
         <TabsList className="mb-8 bg-card/50 border border-border/50 h-14 w-full justify-start overflow-x-auto flex-nowrap">
-          <TabsTrigger value="scores" className="font-display tracking-wide text-lg px-8 h-10 whitespace-nowrap">Live Scores</TabsTrigger>
+          <TabsTrigger value="scores" className="font-display tracking-wide text-lg px-8 h-10 whitespace-nowrap">Games</TabsTrigger>
           <TabsTrigger value="news" className="font-display tracking-wide text-lg px-8 h-10 whitespace-nowrap">Announcements</TabsTrigger>
           <TabsTrigger value="teams" className="font-display tracking-wide text-lg px-8 h-10 whitespace-nowrap">Teams</TabsTrigger>
           <TabsTrigger value="players" className="font-display tracking-wide text-lg px-8 h-10 whitespace-nowrap">Players</TabsTrigger>
         </TabsList>
 
+        {/* Games Tab */}
         <TabsContent value="scores" className="space-y-6">
+
+          {/* Add Game Form */}
+          <Card className="bg-card/40 border-border/50">
+            <CardHeader>
+              <CardTitle className="font-display uppercase tracking-wider text-2xl flex items-center justify-between">
+                <span className="flex items-center gap-3"><CalendarPlus className="w-6 h-6 text-accent" /> Schedule a Game</span>
+                <Button variant="outline" size="sm" onClick={() => setShowAddGame(v => !v)}>
+                  <Plus className="w-4 h-4 mr-2" /> {showAddGame ? "Cancel" : "Add Game"}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            {showAddGame && (
+              <CardContent>
+                <form onSubmit={handleCreateGame} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                  <div className="space-y-2">
+                    <Label className="uppercase text-xs tracking-widest text-muted-foreground">Away Team</Label>
+                    <Select value={newAwayTeamId} onValueChange={setNewAwayTeamId} required>
+                      <SelectTrigger className="bg-background"><SelectValue placeholder="Select Away" /></SelectTrigger>
+                      <SelectContent>
+                        {teams?.map(t => <SelectItem key={t.id} value={t.id.toString()}>{t.abbreviation} — {t.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase text-xs tracking-widest text-muted-foreground">Home Team</Label>
+                    <Select value={newHomeTeamId} onValueChange={setNewHomeTeamId} required>
+                      <SelectTrigger className="bg-background"><SelectValue placeholder="Select Home" /></SelectTrigger>
+                      <SelectContent>
+                        {teams?.map(t => <SelectItem key={t.id} value={t.id.toString()}>{t.abbreviation} — {t.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase text-xs tracking-widest text-muted-foreground">Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      required
+                      value={newScheduledAt}
+                      onChange={e => setNewScheduledAt(e.target.value)}
+                      className="bg-background"
+                    />
+                  </div>
+                  <Button type="submit" className="bg-accent text-black hover:bg-accent/90 font-display tracking-wider h-10" disabled={createGame.isPending}>
+                    {createGame.isPending ? "Adding..." : "Add Game"}
+                  </Button>
+                </form>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Game List */}
           <Card className="bg-card/40 border-border/50">
             <CardHeader>
               <CardTitle className="font-display uppercase tracking-wider text-2xl flex items-center justify-between">
@@ -237,65 +339,60 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="space-y-4">
+                {games?.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No games scheduled. Add one above.</p>
+                )}
                 {games?.map(game => (
-                  <div key={game.id} className={`p-4 border rounded-xl flex flex-col lg:flex-row items-center gap-6 ${game.status === 'live' ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 bg-white/5'}`}>
-                    
-                    <div className="w-full lg:w-1/4">
-                      <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">{format(new Date(game.scheduledAt), "MMM d, h:mm a")}</div>
-                      <Select 
-                        value={game.status} 
-                        onValueChange={(v: any) => handleStatusUpdate(game.id, v)}
-                      >
+                  <div key={game.id} className={`p-4 border rounded-xl flex flex-col lg:flex-row items-center gap-4 ${game.status === 'live' ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 bg-white/5'}`}>
+
+                    {/* Date & Status */}
+                    <div className="w-full lg:w-56 shrink-0">
+                      <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">{format(new Date(game.scheduledAt), "MMM d, yyyy · h:mm a")}</div>
+                      <Select value={game.status} onValueChange={(v: any) => handleStatusUpdate(game.id, v)}>
                         <SelectTrigger className="w-full bg-background">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="upcoming">Upcoming</SelectItem>
-                          <SelectItem value="live">Live (Active)</SelectItem>
-                          <SelectItem value="completed">Completed (Final)</SelectItem>
+                          <SelectItem value="live">🔴 Live</SelectItem>
+                          <SelectItem value="completed">Final</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
+                    {/* Score Controls */}
                     <div className="flex-1 w-full flex items-center justify-center gap-4">
-                      {/* Away Controls */}
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="font-display text-xl tracking-wider">{game.awayTeamAbbreviation}</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="font-display text-base tracking-wider text-muted-foreground">{game.awayTeamAbbreviation}</span>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="icon" onClick={() => handleScoreUpdate(game.id, Math.max(0, game.awayScore - 1), game.homeScore)}>-</Button>
-                          <span className="text-4xl font-display font-bold w-12 text-center">{game.awayScore}</span>
-                          <Button 
-                            variant="default" 
-                            size="icon" 
-                            className="bg-primary text-white"
-                            onClick={() => handleScoreUpdate(game.id, game.awayScore + 1, game.homeScore, true)}
-                          >
-                            +
-                          </Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScoreUpdate(game.id, Math.max(0, game.awayScore - 1), game.homeScore)}>−</Button>
+                          <span className="text-3xl font-display font-bold w-10 text-center">{game.awayScore}</span>
+                          <Button variant="default" size="icon" className="h-8 w-8 bg-primary text-white" onClick={() => handleScoreUpdate(game.id, game.awayScore + 1, game.homeScore, true)}>+</Button>
                         </div>
                       </div>
 
-                      <div className="text-sm font-bold text-muted-foreground px-4">VS</div>
+                      <span className="text-muted-foreground font-bold text-sm mt-4">@</span>
 
-                      {/* Home Controls */}
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="font-display text-xl tracking-wider">{game.homeTeamAbbreviation}</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="font-display text-base tracking-wider text-muted-foreground">{game.homeTeamAbbreviation}</span>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="icon" onClick={() => handleScoreUpdate(game.id, game.awayScore, Math.max(0, game.homeScore - 1))}>-</Button>
-                          <span className="text-4xl font-display font-bold w-12 text-center">{game.homeScore}</span>
-                          <Button 
-                            variant="default" 
-                            size="icon" 
-                            className="bg-primary text-white"
-                            onClick={() => handleScoreUpdate(game.id, game.awayScore, game.homeScore + 1, true)}
-                          >
-                            +
-                          </Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScoreUpdate(game.id, game.awayScore, Math.max(0, game.homeScore - 1))}>−</Button>
+                          <span className="text-3xl font-display font-bold w-10 text-center">{game.homeScore}</span>
+                          <Button variant="default" size="icon" className="h-8 w-8 bg-primary text-white" onClick={() => handleScoreUpdate(game.id, game.awayScore, game.homeScore + 1, true)}>+</Button>
                         </div>
                       </div>
                     </div>
-                    
+
+                    {/* Delete */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                      onClick={() => handleDeleteGame(game.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -303,6 +400,7 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
+        {/* Announcements Tab */}
         <TabsContent value="news">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-1 bg-card/40 border-border/50 h-fit">
@@ -364,6 +462,7 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
 
+        {/* Teams Tab */}
         <TabsContent value="teams">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-1 bg-card/40 border-border/50 h-fit">
@@ -430,6 +529,7 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
 
+        {/* Players Tab */}
         <TabsContent value="players">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-1 bg-card/40 border-border/50 h-fit">
@@ -495,37 +595,33 @@ export default function AdminDashboard() {
                           </div>
                         )}
                       </div>
-
                       {editingPlayer === player.id && (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-black/20 rounded-lg">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-border/50">
                           <div className="space-y-1">
-                            <Label className="text-xs">GP</Label>
-                            <Input type="number" value={playerStats.gamesPlayed} onChange={e => setPlayerStats({...playerStats, gamesPlayed: parseInt(e.target.value) || 0})} className="h-8 bg-background" />
+                            <Label className="text-xs text-muted-foreground">Goals</Label>
+                            <Input type="number" min={0} value={playerStats.goals} onChange={e => setPlayerStats((s: any) => ({ ...s, goals: parseInt(e.target.value) || 0 }))} className="bg-background h-9" />
                           </div>
-                          {player.position === 'G' ? (
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Assists</Label>
+                            <Input type="number" min={0} value={playerStats.assists} onChange={e => setPlayerStats((s: any) => ({ ...s, assists: parseInt(e.target.value) || 0 }))} className="bg-background h-9" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">GP</Label>
+                            <Input type="number" min={0} value={playerStats.gamesPlayed} onChange={e => setPlayerStats((s: any) => ({ ...s, gamesPlayed: parseInt(e.target.value) || 0 }))} className="bg-background h-9" />
+                          </div>
+                          {player.position === "G" && (
                             <>
                               <div className="space-y-1">
-                                <Label className="text-xs">Saves</Label>
-                                <Input type="number" value={playerStats.saves} onChange={e => setPlayerStats({...playerStats, saves: parseInt(e.target.value) || 0})} className="h-8 bg-background" />
+                                <Label className="text-xs text-muted-foreground">Saves</Label>
+                                <Input type="number" min={0} value={playerStats.saves} onChange={e => setPlayerStats((s: any) => ({ ...s, saves: parseInt(e.target.value) || 0 }))} className="bg-background h-9" />
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-xs">SV%</Label>
-                                <Input type="number" step="0.1" value={playerStats.savePercentage} onChange={e => setPlayerStats({...playerStats, savePercentage: parseFloat(e.target.value) || 0})} className="h-8 bg-background" />
+                                <Label className="text-xs text-muted-foreground">GAA</Label>
+                                <Input type="number" min={0} step={0.01} value={playerStats.goalsAgainstAverage} onChange={e => setPlayerStats((s: any) => ({ ...s, goalsAgainstAverage: parseFloat(e.target.value) || 0 }))} className="bg-background h-9" />
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-xs">GAA</Label>
-                                <Input type="number" step="0.1" value={playerStats.goalsAgainstAverage} onChange={e => setPlayerStats({...playerStats, goalsAgainstAverage: parseFloat(e.target.value) || 0})} className="h-8 bg-background" />
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="space-y-1">
-                                <Label className="text-xs">Goals</Label>
-                                <Input type="number" value={playerStats.goals} onChange={e => setPlayerStats({...playerStats, goals: parseInt(e.target.value) || 0})} className="h-8 bg-background" />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-xs">Assists</Label>
-                                <Input type="number" value={playerStats.assists} onChange={e => setPlayerStats({...playerStats, assists: parseInt(e.target.value) || 0})} className="h-8 bg-background" />
+                                <Label className="text-xs text-muted-foreground">SV%</Label>
+                                <Input type="number" min={0} max={1} step={0.001} value={playerStats.savePercentage} onChange={e => setPlayerStats((s: any) => ({ ...s, savePercentage: parseFloat(e.target.value) || 0 }))} className="bg-background h-9" />
                               </div>
                             </>
                           )}

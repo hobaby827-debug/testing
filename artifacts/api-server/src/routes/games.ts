@@ -121,4 +121,12 @@ router.put("/games/:id", async (req, res) => {
   res.json(enriched[0]);
 });
 
+router.delete("/games/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  const [deleted] = await db.delete(gamesTable).where(eq(gamesTable.id, id)).returning();
+  if (!deleted) return res.status(404).json({ error: "Not found" });
+  res.json({ success: true });
+});
+
 export default router;

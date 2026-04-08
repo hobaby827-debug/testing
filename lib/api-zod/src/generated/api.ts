@@ -417,6 +417,17 @@ export const UpdateGameResponse = zod.object({
 });
 
 /**
+ * @summary Delete a game (admin)
+ */
+export const DeleteGameParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteGameResponse = zod.object({
+  success: zod.boolean().optional(),
+});
+
+/**
  * @summary Get game of the week
  */
 export const GetFeaturedGameResponse = zod.object({

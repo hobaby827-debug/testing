@@ -15,6 +15,7 @@ export * from "./createGameBody";
 export * from "./createPlayerBody";
 export * from "./createPlayerBodyPosition";
 export * from "./createTeamBody";
+export * from "./deleteGame200";
 export * from "./game";
 export * from "./gameStatus";
 export * from "./healthStatus";
