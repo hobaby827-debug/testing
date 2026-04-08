@@ -230,6 +230,7 @@ export interface StatLeaders {
 }
 
 export interface AdminLoginBody {
+  username: string;
   password: string;
 }
 

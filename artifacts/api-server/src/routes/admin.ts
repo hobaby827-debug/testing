@@ -1,20 +1,21 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { adminSessionsTable } from "@workspace/db";
-import { eq, gt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
 import crypto from "crypto";
 
 const router = Router();
 
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "arhl-admin-2024";
 
 router.post("/admin/login", async (req, res) => {
   const parsed = AdminLoginBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error });
 
-  if (parsed.data.password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ success: false, message: "Invalid password" });
+  if (parsed.data.username !== ADMIN_USERNAME || parsed.data.password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ success: false, message: "Invalid username or password" });
   }
 
   const token = crypto.randomBytes(32).toString("hex");

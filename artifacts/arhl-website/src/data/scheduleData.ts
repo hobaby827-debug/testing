@@ -105,7 +105,7 @@ export const preseasonSchedule: ScheduleSection[] = [
       { gameNum: 1, date: "4/6/2026",  time: "7:05 PM EST", away: null,  home: null,  finalScore: "3 - 1 SPR", mvp: null, notes: null },
       { gameNum: 2, date: "4/6/2026",  time: "8:00 PM EST", away: null,  home: null,  finalScore: "4 - 1 TOR", mvp: null, notes: null },
       { gameNum: 3, date: "4/7/2026",  time: "7:05 PM EST", away: null,  home: null,  finalScore: "3 - 2 RFD", mvp: null, notes: null },
-      { gameNum: 4, date: "4/8/2026",  time: "7:00 PM EST", away: "CV",  home: "RFD", finalScore: "2 - 0 CV", mvp: null, notes: null },
+      { gameNum: 4, date: "4/8/2026",  time: "7:00 PM EST", away: "CV",  home: "RFD", finalScore: "2 - 0", mvp: null, notes: null },
     ],
   },
   {
