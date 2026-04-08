@@ -12,12 +12,24 @@ export interface Standing {
   teamName: string;
   teamAbbreviation: string;
   division: string;
+  gmName: string;
   primaryColor: string;
   wins: number;
   losses: number;
   otLosses: number;
+  solLosses: number;
+  regulationWins: number;
+  rowWins: number;
   points: number;
+  gamesPlayed: number;
+  gamesRemaining: number;
+  homeGamesRemaining: number;
+  awayGamesRemaining: number;
   goalsFor: number;
   goalsAgainst: number;
   goalDifferential: number;
+  pointsPercentage: number;
+  maxPoints: number;
+  streak: string;
+  clinchStatus?: string;
 }

@@ -432,6 +432,8 @@ components:
           type: string
         division:
           type: string
+        gmName:
+          type: string
         primaryColor:
           type: string
         secondaryColor:
@@ -444,7 +446,21 @@ components:
           type: integer
         otLosses:
           type: integer
+        solLosses:
+          type: integer
+        regulationWins:
+          type: integer
+        rowWins:
+          type: integer
         points:
+          type: integer
+        gamesPlayed:
+          type: integer
+        gamesRemaining:
+          type: integer
+        homeGamesRemaining:
+          type: integer
+        awayGamesRemaining:
           type: integer
         goalsFor:
           type: integer
@@ -452,21 +468,40 @@ components:
           type: integer
         goalDifferential:
           type: integer
+        pointsPercentage:
+          type: number
+        maxPoints:
+          type: integer
+        streak:
+          type: string
+        clinchStatus:
+          type: string
       required:
         - id
         - name
         - abbreviation
         - city
         - division
+        - gmName
         - primaryColor
         - secondaryColor
         - wins
         - losses
         - otLosses
+        - solLosses
+        - regulationWins
+        - rowWins
         - points
+        - gamesPlayed
+        - gamesRemaining
+        - homeGamesRemaining
+        - awayGamesRemaining
         - goalsFor
         - goalsAgainst
         - goalDifferential
+        - pointsPercentage
+        - maxPoints
+        - streak
 
     TeamDetail:
       allOf:
@@ -493,11 +528,39 @@ components:
           type: string
         division:
           type: string
+        gmName:
+          type: string
         primaryColor:
           type: string
         secondaryColor:
           type: string
         logoUrl:
+          type: string
+        wins:
+          type: integer
+        losses:
+          type: integer
+        otLosses:
+          type: integer
+        solLosses:
+          type: integer
+        regulationWins:
+          type: integer
+        rowWins:
+          type: integer
+        goalsFor:
+          type: integer
+        goalsAgainst:
+          type: integer
+        gamesRemaining:
+          type: integer
+        homeGamesRemaining:
+          type: integer
+        awayGamesRemaining:
+          type: integer
+        streak:
+          type: string
+        clinchStatus:
           type: string
       required:
         - name
@@ -591,6 +654,8 @@ components:
           type: string
         division:
           type: string
+        gmName:
+          type: string
         primaryColor:
           type: string
         wins:
@@ -599,7 +664,21 @@ components:
           type: integer
         otLosses:
           type: integer
+        solLosses:
+          type: integer
+        regulationWins:
+          type: integer
+        rowWins:
+          type: integer
         points:
+          type: integer
+        gamesPlayed:
+          type: integer
+        gamesRemaining:
+          type: integer
+        homeGamesRemaining:
+          type: integer
+        awayGamesRemaining:
           type: integer
         goalsFor:
           type: integer
@@ -607,20 +686,39 @@ components:
           type: integer
         goalDifferential:
           type: integer
+        pointsPercentage:
+          type: number
+        maxPoints:
+          type: integer
+        streak:
+          type: string
+        clinchStatus:
+          type: string
       required:
         - rank
         - teamId
         - teamName
         - teamAbbreviation
         - division
+        - gmName
         - primaryColor
         - wins
         - losses
         - otLosses
+        - solLosses
+        - regulationWins
+        - rowWins
         - points
+        - gamesPlayed
+        - gamesRemaining
+        - homeGamesRemaining
+        - awayGamesRemaining
         - goalsFor
         - goalsAgainst
         - goalDifferential
+        - pointsPercentage
+        - maxPoints
+        - streak
 
     Game:
       type: object

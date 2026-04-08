@@ -7,11 +7,20 @@ import { CreateTeamBody, UpdateTeamBody } from "@workspace/api-zod";
 const router = Router();
 
 function computeTeamStats(team: typeof teamsTable.$inferSelect) {
+  const gamesPlayed = team.wins + team.losses + team.otLosses + team.solLosses;
+  const points = team.wins * 2 + team.otLosses + team.solLosses;
+  const maxPoints = points + team.gamesRemaining * 2;
+  const pointsPercentage = gamesPlayed > 0 ? points / (gamesPlayed * 2) : 0;
+
   return {
     ...team,
-    points: team.wins * 2 + team.otLosses,
+    gamesPlayed,
+    points,
+    maxPoints,
+    pointsPercentage: Math.round(pointsPercentage * 1000) / 1000,
     goalDifferential: team.goalsFor - team.goalsAgainst,
     logoUrl: team.logoUrl ?? null,
+    clinchStatus: team.clinchStatus ?? null,
   };
 }
 

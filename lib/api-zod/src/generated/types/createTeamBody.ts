@@ -11,7 +11,21 @@ export interface CreateTeamBody {
   abbreviation: string;
   city: string;
   division: string;
+  gmName?: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;
+  wins?: number;
+  losses?: number;
+  otLosses?: number;
+  solLosses?: number;
+  regulationWins?: number;
+  rowWins?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  gamesRemaining?: number;
+  homeGamesRemaining?: number;
+  awayGamesRemaining?: number;
+  streak?: string;
+  clinchStatus?: string;
 }
