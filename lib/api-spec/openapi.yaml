@@ -3,20 +3,31 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ARHL API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: teams
+    description: Team operations
+  - name: players
+    description: Player operations
+  - name: standings
+    description: Standings operations
+  - name: games
+    description: Game/schedule operations
+  - name: announcements
+    description: Announcement operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,380 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /teams:
+    get:
+      operationId: listTeams
+      tags: [teams]
+      summary: List all teams
+      responses:
+        "200":
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Team"
+    post:
+      operationId: createTeam
+      tags: [teams]
+      summary: Create a team (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamBody"
+      responses:
+        "201":
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /teams/{id}:
+    get:
+      operationId: getTeam
+      tags: [teams]
+      summary: Get a single team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Team detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamDetail"
+    put:
+      operationId: updateTeam
+      tags: [teams]
+      summary: Update a team (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamBody"
+      responses:
+        "200":
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /players:
+    get:
+      operationId: listPlayers
+      tags: [players]
+      summary: List all players with stats
+      parameters:
+        - name: teamId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [goals, assists, points, saves, gaa]
+      responses:
+        "200":
+          description: List of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Player"
+    post:
+      operationId: createPlayer
+      tags: [players]
+      summary: Create a player (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlayerBody"
+      responses:
+        "201":
+          description: Player created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /players/{id}:
+    put:
+      operationId: updatePlayer
+      tags: [players]
+      summary: Update player stats (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlayerBody"
+      responses:
+        "200":
+          description: Player updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /standings:
+    get:
+      operationId: getStandings
+      tags: [standings]
+      summary: Get league standings
+      responses:
+        "200":
+          description: League standings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Standing"
+
+  /standings/summary:
+    get:
+      operationId: getStandingsSummary
+      tags: [standings]
+      summary: Get top 3 teams for homepage preview
+      responses:
+        "200":
+          description: Top standings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Standing"
+
+  /games:
+    get:
+      operationId: listGames
+      tags: [games]
+      summary: List all scheduled games
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [upcoming, live, completed]
+        - name: teamId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Games list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Game"
+    post:
+      operationId: createGame
+      tags: [games]
+      summary: Schedule a game (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGameBody"
+      responses:
+        "201":
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+
+  /games/{id}:
+    put:
+      operationId: updateGame
+      tags: [games]
+      summary: Update game score/status (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGameBody"
+      responses:
+        "200":
+          description: Game updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+
+  /games/featured:
+    get:
+      operationId: getFeaturedGame
+      tags: [games]
+      summary: Get game of the week
+      responses:
+        "200":
+          description: Featured game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+
+  /games/ticker:
+    get:
+      operationId: getTickerGames
+      tags: [games]
+      summary: Get recent and live games for the ticker
+      responses:
+        "200":
+          description: Ticker games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TickerGame"
+
+  /announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [announcements]
+      summary: List all announcements
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+    post:
+      operationId: createAnnouncement
+      tags: [announcements]
+      summary: Create announcement (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnnouncementBody"
+      responses:
+        "201":
+          description: Announcement created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  /announcements/{id}:
+    delete:
+      operationId: deleteAnnouncement
+      tags: [announcements]
+      summary: Delete announcement (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/leaders:
+    get:
+      operationId: getStatLeaders
+      tags: [players]
+      summary: Get top stat leaders for homepage
+      responses:
+        "200":
+          description: Stat leaders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatLeaders"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Login result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Get current admin session
+      responses:
+        "200":
+          description: Admin info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMe"
+        "401":
+          description: Not authenticated
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +419,371 @@ components:
       required:
         - status
 
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        abbreviation:
+          type: string
+        city:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        logoUrl:
+          type: string
+        wins:
+          type: integer
+        losses:
+          type: integer
+        points:
+          type: integer
+        goalsFor:
+          type: integer
+        goalsAgainst:
+          type: integer
+        goalDifferential:
+          type: integer
+      required:
+        - id
+        - name
+        - abbreviation
+        - city
+        - primaryColor
+        - secondaryColor
+        - wins
+        - losses
+        - points
+        - goalsFor
+        - goalsAgainst
+        - goalDifferential
+
+    TeamDetail:
+      allOf:
+        - $ref: "#/components/schemas/Team"
+        - type: object
+          properties:
+            players:
+              type: array
+              items:
+                $ref: "#/components/schemas/Player"
+            schedule:
+              type: array
+              items:
+                $ref: "#/components/schemas/Game"
+
+    CreateTeamBody:
+      type: object
+      properties:
+        name:
+          type: string
+        abbreviation:
+          type: string
+        city:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        logoUrl:
+          type: string
+      required:
+        - name
+        - abbreviation
+        - city
+        - primaryColor
+        - secondaryColor
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        position:
+          type: string
+          enum: [LW, C, RW, LD, RD, G]
+        teamId:
+          type: integer
+        teamName:
+          type: string
+        teamAbbreviation:
+          type: string
+        goals:
+          type: integer
+        assists:
+          type: integer
+        points:
+          type: integer
+        gamesPlayed:
+          type: integer
+        saves:
+          type: integer
+        goalsAgainstAverage:
+          type: number
+        savePercentage:
+          type: number
+      required:
+        - id
+        - username
+        - position
+        - teamId
+        - goals
+        - assists
+        - points
+        - gamesPlayed
+
+    CreatePlayerBody:
+      type: object
+      properties:
+        username:
+          type: string
+        position:
+          type: string
+          enum: [LW, C, RW, LD, RD, G]
+        teamId:
+          type: integer
+      required:
+        - username
+        - position
+        - teamId
+
+    UpdatePlayerBody:
+      type: object
+      properties:
+        goals:
+          type: integer
+        assists:
+          type: integer
+        gamesPlayed:
+          type: integer
+        saves:
+          type: integer
+        goalsAgainstAverage:
+          type: number
+        savePercentage:
+          type: number
+
+    Standing:
+      type: object
+      properties:
+        rank:
+          type: integer
+        teamId:
+          type: integer
+        teamName:
+          type: string
+        teamAbbreviation:
+          type: string
+        primaryColor:
+          type: string
+        wins:
+          type: integer
+        losses:
+          type: integer
+        points:
+          type: integer
+        goalsFor:
+          type: integer
+        goalsAgainst:
+          type: integer
+        goalDifferential:
+          type: integer
+      required:
+        - rank
+        - teamId
+        - teamName
+        - teamAbbreviation
+        - primaryColor
+        - wins
+        - losses
+        - points
+        - goalsFor
+        - goalsAgainst
+        - goalDifferential
+
+    Game:
+      type: object
+      properties:
+        id:
+          type: integer
+        homeTeamId:
+          type: integer
+        awayTeamId:
+          type: integer
+        homeTeamName:
+          type: string
+        awayTeamName:
+          type: string
+        homeTeamAbbreviation:
+          type: string
+        awayTeamAbbreviation:
+          type: string
+        homeTeamColor:
+          type: string
+        awayTeamColor:
+          type: string
+        homeScore:
+          type: integer
+        awayScore:
+          type: integer
+        status:
+          type: string
+          enum: [upcoming, live, completed]
+        scheduledAt:
+          type: string
+          format: date-time
+        isFeatured:
+          type: boolean
+      required:
+        - id
+        - homeTeamId
+        - awayTeamId
+        - homeTeamName
+        - awayTeamName
+        - homeTeamAbbreviation
+        - awayTeamAbbreviation
+        - homeTeamColor
+        - awayTeamColor
+        - homeScore
+        - awayScore
+        - status
+        - scheduledAt
+        - isFeatured
+
+    TickerGame:
+      type: object
+      properties:
+        id:
+          type: integer
+        homeTeamAbbreviation:
+          type: string
+        awayTeamAbbreviation:
+          type: string
+        homeScore:
+          type: integer
+        awayScore:
+          type: integer
+        status:
+          type: string
+      required:
+        - id
+        - homeTeamAbbreviation
+        - awayTeamAbbreviation
+        - homeScore
+        - awayScore
+        - status
+
+    CreateGameBody:
+      type: object
+      properties:
+        homeTeamId:
+          type: integer
+        awayTeamId:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+        isFeatured:
+          type: boolean
+      required:
+        - homeTeamId
+        - awayTeamId
+        - scheduledAt
+
+    UpdateGameBody:
+      type: object
+      properties:
+        homeScore:
+          type: integer
+        awayScore:
+          type: integer
+        status:
+          type: string
+          enum: [upcoming, live, completed]
+        isFeatured:
+          type: boolean
+
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - content
+        - category
+        - createdAt
+
+    CreateAnnouncementBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+      required:
+        - title
+        - content
+        - category
+
+    StatLeaders:
+      type: object
+      properties:
+        topGoalScorer:
+          $ref: "#/components/schemas/Player"
+        topPointsLeader:
+          $ref: "#/components/schemas/Player"
+        topGoalie:
+          $ref: "#/components/schemas/Player"
+        topTeam:
+          $ref: "#/components/schemas/Standing"
+      required:
+        - topGoalScorer
+        - topPointsLeader
+        - topGoalie
+        - topTeam
+
+    AdminLoginBody:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+        - password
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    AdminMe:
+      type: object
+      properties:
+        isAdmin:
+          type: boolean
+      required:
+        - isAdmin

@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "z5jScB6I-muucbaFUU_SP"
+uri = "file://artifacts/arhl-website/public/hero-bg.png"
+type = "image"
+title = "Hockey arena hero background"
+
+[[generated]]
+id = "g-V6tsZjTcBFCm9ffBpOC"
+uri = "file://artifacts/arhl-website/public/team-logo-placeholder.png"
+type = "image"
+title = "Team logo crest"

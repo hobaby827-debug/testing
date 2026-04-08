@@ -1,0 +1,102 @@
+Create a modern, clean, and professional website for my Roblox hockey league called **ARHL (American Roblox Hockey League)**.
+
+STYLE:
+
+* Theme: Dark mode with hockey-style design (ice textures, neon accents, scoreboard vibes)
+* Colors: Black, white, and accent colors based on teams
+* Font: Bold sports-style font for headers, clean readable font for content
+* Animations: Smooth transitions, hover effects, and scoreboard-style animations
+* Overall feel: Like a real sports league website (similar to NHL/AHL style)
+
+STRUCTURE:
+
+1. HOME PAGE
+
+* Large hero section with league name "ARHL"
+* Subtitle: "American Roblox Hockey League"
+* Background: Hockey arena or ice rink
+* Buttons: "View Teams", "Standings", "Join League"
+* Section for latest news/announcements
+* Featured matchup or "Game of the Week"
+* Quick stats (top player, top team, standings preview)
+
+2. TEAMS PAGE
+
+* Grid layout showing all teams with logos
+* Each team card clickable
+* Team page includes:
+
+  * Team logo
+  * Roster
+  * Wins/Losses
+  * Stats
+  * Schedule
+
+3. STANDINGS PAGE
+
+* Table format:
+
+  * Team
+  * Wins
+  * Losses
+  * Points
+  * Goal Differential
+* Pull data dynamically from Google Sheets:
+  https://docs.google.com/spreadsheets/d/1ylm3SsZh6ysXVtTiN7rjiHUibzcuzlm3qUBMYfVko7I/edit
+
+4. PLAYER STATS PAGE
+
+* Leaderboards:
+
+  * Goals
+  * Assists
+  * Points
+  * Goalie stats
+* Sortable tables
+* Data pulled from Google Sheets
+
+5. SCHEDULE PAGE
+
+* Weekly schedule layout
+* Show matchups, times, and results
+* Highlight live or recent games
+
+6. RULEBOOK PAGE
+
+* Pull formatted content from:
+  https://docs.google.com/document/d/1vrD_bLWinkz8qW2QSeMclGCr__bcOU0cYMGE-i6TEks/edit
+* Clean readable format with sections and headings
+
+7. JOIN PAGE
+
+* Instructions on how to join the league
+* Discord invite button
+* Application form (Name, Position, Experience)
+
+8. ADMIN PANEL (IMPORTANT)
+
+* Hidden login page for admins
+* Ability to:
+
+  * Update scores
+  * Add teams
+  * Update stats
+  * Post announcements
+
+FEATURES:
+
+* Auto-update data from Google Sheets
+* Team logos automatically display
+* Responsive design (mobile + desktop)
+* Scoreboard-style UI for games
+* Goal alert popup animation when scores update
+* Navigation bar with all pages
+* Footer with Discord link and league info
+
+EXTRA:
+
+* Add a live ticker at the bottom showing scores and updates
+* Add a "Game of the Week" highlight section
+* Make it feel like a real professional hockey league site
+
+Make the website visually impressive, fast, and easy to use.
