@@ -1,6 +1,5 @@
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
-import { Ticker } from "./Ticker";
 import { ReactNode } from "react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -11,7 +10,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer />
-      <Ticker />
     </div>
   );
 }
