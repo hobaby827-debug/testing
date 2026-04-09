@@ -2,7 +2,7 @@ services:
   - type: web
     name: arhl-website
     runtime: node
-    buildCommand: "PORT=3000 BASE_PATH=/ pnpm install && pnpm --filter @workspace/arhl-website run build && pnpm --filter @workspace/api-server run build"
+    buildCommand: "pnpm install && pnpm --filter @workspace/arhl-website run build && pnpm --filter @workspace/api-server run build"
     startCommand: "node --enable-source-maps ./artifacts/api-server/dist/index.mjs"
     envVars:
       - key: NODE_ENV
